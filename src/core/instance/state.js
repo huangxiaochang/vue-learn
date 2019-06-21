@@ -63,7 +63,8 @@ export function initState (vm: Component) {
 }
 
 // 初始化props
-// 在实例对象的_props属性中设置props同名属性,并且通过defineReactive把他们设置成了响应式属性
+// 在实例对象的_props属性中设置props同名属性,并且通过defineReactive把他们设置成了响应式属性。
+// 通过 proxy 把 vm._props.xxx 的访问代理到 vm.xxx 上
 function initProps (vm: Component, propsOptions: Object) {
   // vm.$options.propsData外界传进来的数据
   const propsData = vm.$options.propsData || {}
@@ -114,6 +115,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
     if (!(key in vm)) {
+      // 把vm._props.xx的访问代理到vm.xx上
       proxy(vm, `_props`, key)
     }
   }
@@ -169,7 +171,7 @@ function initData (vm: Component) {
       proxy(vm, `_data`, key)
     }
   }
-  // observe data
+  // observe data。data = vm._data
   observe(data, true /* asRootData */)
 }
 

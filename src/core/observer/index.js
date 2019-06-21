@@ -33,6 +33,7 @@ export function toggleObserving (value: boolean) {
  * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
+ * Observer类的主要作用是给对象的属性添加getter/setter，用于依赖的收集和派发更新。
  */
 export class Observer {
   value: any;
@@ -44,7 +45,7 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    // 在数据对象设置__ob__属性，值为O不server实例对象，并且设置成不可遍历
+    // 在数据对象设置__ob__属性，值为Observer实例对象，并且设置成不可遍历
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       // 这个if分支是处理数据的观测问题
@@ -117,7 +118,30 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  * 初始化时的value和asRootData分别是data选项和true
- * 该函数的作用是对传进来的value进行观测，并且返回观测Observer的实例
+ * 该函数的作用是对传进来的value进行观测，并且返回观测Observer的实例.
+ * 即给对象类型的数据添加一个Observer,如果已经添加过，则直接返回。
+ * 本质是给对象添加__ob__属性，并且把对象的属性设置getter/setter。
+ */
+/*
+  如我们组件的data选项处理后为： 
+  data: {
+    // a属性设置了getter/setter,并闭包引用一个Dep实例dep
+    a: {
+      // b属性设置了getter/setter,并闭包引用一个Dep实例dep
+      b: 123,
+      __ob__: observer
+    },
+    // c属性设置了getter/setter,并闭包引用一个Dep实例dep
+    c: {
+      // d属性设置了getter/setter,并闭包引用一个Dep实例dep
+      d: 456,
+      __ob__: observer
+    },
+    __ob__: { // Observer的实例
+      dep: { // Dep的实例},
+      value: 
+    }
+  }
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
@@ -146,7 +170,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 /**
  * Define a reactive property on an Object.
  * 此函数的核心是将数据对象的数据属性转换成访问器属性，同时在get属性值的时候，进行收集依赖，在set的时候，进行调用
- * 依赖
+ * 依赖.
+ * 该函数功能：定义一个响应式对象，给对象动态添加getter/setter。
  */
 export function defineReactive (
   obj: Object,

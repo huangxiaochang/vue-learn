@@ -28,6 +28,7 @@ export default class Dep {
   }
 
   depend () {
+    // 其中响应式数据属性闭包引用的dep会调用depend方法，则this为该dep
     if (Dep.target) {
       Dep.target.addDep(this)
     }

@@ -195,9 +195,15 @@ export default class Watcher {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
+        // 如果需要深度观测，则递归访问value, 触发子项的getter，进行依赖的收集
         traverse(value)
       }
       popTarget()
+      // 清空收集的无效依赖。
+      // 如：我们有v-if条件渲染，当我们满足条件渲染a模板时，访问a模板中数据，进行了依赖的收集，
+      // 然后我们改变渲染的条件，去渲染b模板，会对b模板中依赖的数据进行依赖的收集，
+      // 如果不进行失效依赖的移除的话，当我们去修改a模板中数据，会通知a数据的订阅的回调，这会造成浪费，
+      // 所以在这里进行了无效依赖的移除。
       this.cleanupDeps()
     }
     return value
@@ -205,6 +211,10 @@ export default class Watcher {
 
   /**
    * Add a dependency to this directive.
+   * 其中响应式数据闭包引用的dep调用depend，然后在depend中调用addDep，并传入参数this,
+   * 所以这里的dep为响应式数据属性闭包引用的dep。
+   * 所以调用addDep的结果为：在观察者watcher实例的newDeps中添加依赖的数据属性的dep,
+   * 同时在依赖的数据属性引用的dep中添加watcher实例。
    */
   addDep (dep: Dep) {
     const id = dep.id
@@ -221,6 +231,7 @@ export default class Watcher {
 
   /**
    * Clean up for dependency collection.
+   * 清空依赖收集
    */
   cleanupDeps () {
     let i = this.deps.length
