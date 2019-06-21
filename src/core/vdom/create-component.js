@@ -131,11 +131,15 @@ export function createComponent (
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
+    // 解析异步组件，第一次解析的时候，在进行异步加载时，已经执行完resolveAsyncComponent，
+    // 返回值为undefined，然后等到异步加载完成，进行resolve后，会进行强制重新渲染，从而会
+    // 在此执行这里，再次执行resolveAsyncComponent，得到异步加载完成之后的结果
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {
       // return a placeholder node for async component, which is rendered
       // as a comment node but preserves all the raw information for the node.
       // the information will be used for async server-rendering and hydration.
+      // 第一次resolveAsyncComponent的返回值为undefined，所以会执行这里，创建一个异步组件的占位注释节点
       return createAsyncPlaceholder(
         asyncFactory,
         data,
@@ -227,6 +231,8 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
+// 安装组件hook： 把componentVNodeHooks 的钩子函数合并到 data.hook 中
+// componentVNodeHooks 的钩子函数会在patch的过程中执行相关的钩子函数
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {

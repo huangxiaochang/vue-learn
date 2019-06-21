@@ -61,8 +61,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevEl = vm.$el
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
+    // 把当前vm赋值activeInstance, prevActiveInstance和当前的vm是父子关系。
+    // 在vm.__patch__的过程中，createComponentInstanceForVnode会通过获取activeInstance
+    // 来作为参数传入。
     activeInstance = vm
-    vm._vnode = vnode
+    vm._vnode = vnode // vnode 为render函数返回的组件渲染vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     // Vue.prototype.__patch__: web/runtime/index
@@ -73,6 +76,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
+    // vm.__patch__之后，又把activeInstance赋值之前的vm，这样保证了createComponentInstanceForVnode 
+    // 整个深度遍历过程中，我们在实例子组件的时候，能传入当前子组件的父Vue实例。
     activeInstance = prevActiveInstance
     // update __vue__ reference
     if (prevEl) {

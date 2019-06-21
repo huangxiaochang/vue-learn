@@ -26,6 +26,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         if (type === 'directive' && typeof definition === 'function') {
           definition = { bind: definition, update: definition }
         }
+        // 挂载到Vue.options,然后在组件实例化阶段，merge options逻辑，合并到vm.$options上
         this.options[type + 's'][id] = definition
         return definition
       }

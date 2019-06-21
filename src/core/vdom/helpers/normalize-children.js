@@ -5,16 +5,20 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
-//
+//模板编译器通过在编译的时候进行静态分析来视图去最小化需要规范化。
 // For plain HTML markup, normalization can be completely skipped because the
 // generated render function is guaranteed to return Array<VNode>. There are
 // two cases where extra normalization is needed:
+// 对于纯html标记，规范化会被跳过，因为生成render函数的时候，保证返回一个数组类型的vnode。
+// 这里有两种情况是需要进行规范化的。
 
 // 1. When the children contains components - because a functional component
 // may return an Array instead of a single root. In this case, just a simple
 // normalization is needed - if any child is an Array, we flatten the whole
 // thing with Array.prototype.concat. It is guaranteed to be only 1-level deep
 // because functional components already normalize their own children.
+// 当children包含组件的时候(因为函数式组件可能会返回一个数组而不是单个根节点)，
+// 这种情况下， 如果任何的child是一个数组的时候，只需要简单的规范化。即进行数组扁平化。
 export function simpleNormalizeChildren (children: any) {
   for (let i = 0; i < children.length; i++) {
     if (Array.isArray(children[i])) {
