@@ -138,7 +138,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
       __ob__: observer
     },
     __ob__: { // Observer的实例
-      dep: { // Dep的实例},
+      dep: { // Dep的实例，用于收集$set设置的属性的依赖},
       value: 
     }
   }

@@ -3,13 +3,14 @@
 import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
-
+// baseCompile -> src/compiler/index
 export function createCompilerCreator (baseCompile: Function): Function {
+  // baseOptions不同的平台传入不同，web平台时在web/compiler/index中传入
   return function createCompiler (baseOptions: CompilerOptions) {
     // 真正的编译工作是依托compile函数，主要的作用
     // 1.生成最终编译选项
     // 2.对错误进行收集
-    // 3.调用baseCompile编译模板
+    // 3.调用baseCompile编译模板。
     function compile (
       template: string,
       options?: CompilerOptions
@@ -43,8 +44,9 @@ export function createCompilerCreator (baseCompile: Function): Function {
           }
         }
       }
-
+      // 真正执行编译的过程
       const compiled = baseCompile(template, finalOptions)
+
       if (process.env.NODE_ENV !== 'production') {
         errors.push.apply(errors, detectErrors(compiled.ast))
       }
@@ -55,7 +57,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
 
     return {
       compile,
-      compileToFunctions: createCompileToFunctionFn(compile)
+      compileToFunctions: createCompileToFunctionFn(compile) // compile 会在 compileToFunctions中被调用
     }
   }
 }

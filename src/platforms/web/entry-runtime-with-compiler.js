@@ -78,8 +78,8 @@ Vue.prototype.$mount = function (
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
-        delimiters: options.delimiters,
-        comments: options.comments
+        delimiters: options.delimiters, // 改变纯文本插入分隔符，默认["{{", "}}"]
+        comments: options.comments // 编译时，是否保留模板中的注释, 默认去除
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns

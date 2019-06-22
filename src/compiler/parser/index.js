@@ -5,7 +5,7 @@
   节点类型、节点html标签，属性列表、所属的父节点，子节点ast列表。节点的attribute， 指令信息， 指令依赖的data属性等等。
   解析的过程：
     对于模板字符进行从上往下的解析，使用正则表达式来进行匹配开始标签，结束标签，文本节点， 注释节点，属性节点，特殊html标签，
-    vue内部预定的指令，正对不同的指令，拥有不同的处理方式。
+    vue内部预定的指令，针对不同的指令，拥有不同的处理方式。
     然后把模板的标签信息创建成ast节点，组成一个ast树。
  */
 import he from 'he'
@@ -73,6 +73,7 @@ export function parse (
   template: string,
   options: CompilerOptions
 ): ASTElement | void {
+  // 从options中获取相关的编译配置
   warn = options.warn || baseWarn
 
   platformIsPreTag = options.isPreTag || no
@@ -114,7 +115,7 @@ export function parse (
     }
   }
 
-  // 词法分析，句法分析
+  // 解析html模板 词法分析，句法分析
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -540,7 +541,7 @@ function processAttrs (el) {
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true
-      // modifiers
+      // modifiers，解析修饰符
       modifiers = parseModifiers(name)
       if (modifiers) {
         name = name.replace(modifierRE, '')
@@ -625,7 +626,9 @@ function checkInFor (el: ASTElement): boolean {
   return false
 }
 
+// 解析修饰符
 function parseModifiers (name: string): Object | void {
+  // 匹配.号，解析修饰符
   const match = name.match(modifierRE)
   if (match) {
     const ret = {}

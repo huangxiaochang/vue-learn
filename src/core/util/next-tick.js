@@ -25,14 +25,21 @@ function flushCallbacks () {
 // when state is changed right before repaint (e.g. #6813, out-in transitions).
 // Here we use microtask by default, but expose a way to force (macro) task when
 // needed (e.g. in event handlers attached by v-on).
+// 我们有使用微观、宏观任务的异步包装。在小于2.4的版本，我们都是使用微观任务，但是有些情况下，
+// 微观任务拥有太高的优先级，所以在一些顺序的事件或者即使在同一事件的冒泡之间会发生冲突。然而，如果
+// 我们全部使用宏观任务的话，也会发生一些微妙的问题，但状态在重绘之前已经正确改变的情况下。所在在这里我们
+// 默认使用微观任务，但是暴露一个方法去强制使用宏观任务当需要的时候。
 let microTimerFunc
 let macroTimerFunc
 let useMacroTask = false
 
 // Determine (macro) task defer implementation.
+// 宏观任务的延迟实现
 // Technically setImmediate should be the ideal choice, but it's only available
 // in IE. The only polyfill that consistently queues the callback after all DOM
 // events triggered in the same loop is by using MessageChannel.
+// 技术上来说，使用setImmediate是一个理想的选择，但是它只在ie上支持。在同一循环中触发所有的DOM事件后，
+// 唯一一致地对回调进行排队的polyfill是使用MessageChannel。
 /* istanbul ignore if */
 // 把flushCallbacks注册为macrotask
 // 优先使用setImmediate（因为它不需要做超时检查）,因为性能比较高，但是缺点是目前只有IE支持
@@ -98,6 +105,8 @@ export function withMacroTask (fn: Function): Function {
 
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
+  // 这里使用callback而不是直接在nextTick中执行回调函数的原因是为了保证在同一个tick
+  // 内多次调用nextTick的时候，把这些异步任务都压成一个同步任务，在下一个tick中执行，而不是开启多个异步任务。
   callbacks.push(() => {
     if (cb) {
       try {
@@ -119,6 +128,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
     }
   }
   // $flow-disable-line
+  // 当不传cb时，提供一个Promise化的调用，比如nextTick().then(() => {})
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
       _resolve = resolve

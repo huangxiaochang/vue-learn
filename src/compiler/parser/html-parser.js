@@ -128,7 +128,7 @@ export function parseHTML (html, options) {
           continue
         }
       }
-
+      // 文本是的处理
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)

@@ -269,15 +269,20 @@ export default class Watcher {
         // so we simply mark the watcher as dirty. The actual computation is
         // performed just-in-time in this.evaluate() when the computed property
         // is accessed.
+        // 如果没有订阅该计算属性的变化，则只需把dirty设置成true，只有当下次在访问这个计算属性的时候，
+        // 才会重新求值
         this.dirty = true
       } else {
         // In activated mode, we want to proactively perform the computation
         // but only notify our subscribers when the value has indeed changed.
+        // 使用getAndInvoke进行求值，只有当计算属性值发生变化的时候，才会通知依赖计算属性watcher，而不是
+        // 在计算属性依赖的响应式数据属性发生变化的时候，就进行通知依赖。因为getAndInvoke中，会进行新旧值的对比。
         this.getAndInvoke(() => {
           this.dep.notify()
         })
       }
     } else if (this.sync) {
+      // 同步执行执行watcher的回调函数
       this.run()
     } else {
       // 渲染函数观察者不是同步更新变化，而是放在一个异步更新队列中
@@ -329,6 +334,7 @@ export default class Watcher {
    */
   evaluate () {
     if (this.dirty) {
+      // 在计算属性进行求值的时候，会在计算属性依赖的响应式数据属性引用的dep中添加computed watcher。
       this.value = this.get()
       this.dirty = false
     }
@@ -337,10 +343,13 @@ export default class Watcher {
 
   /**
    * Depend on this watcher. Only for computed property watchers.
-   * 计算属性的依赖收集，收集的依赖是渲染函数观察者对象
+   * 计算属性的依赖收集，收集的依赖是渲染函数观察者对象.
+   * 即在计算属性的watcher的dep中添加依赖该计算属性的wathcer,如：render watcher。
+   * 然后同时会在依赖该计算属性的wathcer,如：render watcher的depIds，deps中添加computed watcher的id和自生
    */
   depend () {
     if (this.dep && Dep.target) {
+      // 这里的this -> computed watcher
       this.dep.depend()
     }
   }

@@ -19,7 +19,7 @@ function createFunction (code, errors) {
 
 export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
-
+  // 这里才是真正把template编译成render函数的函数
   return function compileToFunctions (
     template: string,
     options?: CompilerOptions,
@@ -75,6 +75,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // turn code into functions
+    // 使用new Function()把compile生成的render函数体字符串转化成函数赋值给render和staticRenderFns
     const res = {}
     const fnGenErrors = []
     // 以compiled.render作为函数体进行创建编译函数，fnGenErrors进行收集错误的信息

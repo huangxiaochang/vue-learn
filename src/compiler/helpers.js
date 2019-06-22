@@ -64,8 +64,9 @@ export function addHandler (
       'Passive handler can\'t prevent default event.'
     )
   }
-
+  // 根据修饰符对事件名name做处理
   // check capture modifier
+  // capture修饰符：添加事件监听器时，使用事件捕获模式
   if (modifiers.capture) {
     delete modifiers.capture
     name = '!' + name // mark the event as captured
@@ -75,6 +76,11 @@ export function addHandler (
     name = '~' + name // mark the event as once
   }
   /* istanbul ignore if */
+  // passive修饰符：即执行默认行为。有些元素拥有自身的默认事件，会在冒泡结束后开始执行默认事件。
+  // prevent修饰符是制止默认事件，而passive是不拦截默认事件。本来元素的默认事件行为会默认执行的，为什么
+  // 还要passive修饰符呢，原因就是，浏览器内核在每次事件产生，都会去查询是否有preventDefault阻止该次的
+  // 事件默认动作。这种情况下，每次都会查询prevent会影响性能，特别是滑动事件中，会使滑动卡顿，所以当我们
+  // 加上passive修饰符时，浏览器就不用去查询是否使用了prevent,我们没有使用prevent，这样可以大大提升滑动的流产度
   if (modifiers.passive) {
     delete modifiers.passive
     name = '&' + name // mark the event as passive
