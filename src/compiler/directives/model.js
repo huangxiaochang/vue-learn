@@ -2,6 +2,7 @@
 
 /**
  * Cross-platform code generation for component v-model
+ * 生成组件上的v-model指令代码
  */
 export function genComponentModel (
   el: ASTElement,
@@ -32,6 +33,9 @@ export function genComponentModel (
 
 /**
  * Cross-platform codegen helper for generating v-model value assignment code.
+ * 生成v-model指令值的赋值代码
+ * value: v-model绑定的字段，
+ * assignment: 事件值的表达式
  */
 export function genAssignmentCode (
   value: string,
@@ -67,6 +71,7 @@ type ModelParseResult = {
   key: string | null
 }
 
+// 解析v-model指令绑定的字段
 export function parseModel (val: string): ModelParseResult {
   // Fix https://github.com/vuejs/vue/pull/7730
   // allow v-model="obj.val " (trailing whitespace)

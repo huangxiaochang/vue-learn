@@ -44,6 +44,7 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // keep-alive组件命中缓存时，不会走这里，所以就不会再执行mounted，created等钩子函数
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -157,6 +158,7 @@ export function createComponent (
   resolveConstructorOptions(Ctor)
 
   // transform component v-model data into props & events
+  // 把组件中的v-model数据转化成props和events
   if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
@@ -260,9 +262,23 @@ function mergeHook (f1: any, f2: any): Function {
 
 // transform component v-model info (value and callback) into
 // prop and event handler respectively.
+// 把v-model指令转成props和event，即给data.props添加data.model.value,
+// data.on添加data.model.callback。
+// 也就是相当于我们在子组件占位符中编写：:value="xxx" @input="xxx=arguments[0]"
 function transformModel (options, data: any) {
+  // 允许我们在子组件中配置v-model接收的props名以及派发的event名，默认为value和input
+  // 如:在子组件中加上model选项：
+  /*
+    model: {
+      prop: 'msg',
+      event: 'change'
+    },
+    然后子组件中绑定时使用msg, 在派发事件时，派发名为change的事件：this.$emit('change').
+    然后父组件中使用v-model绑定时，并不需要额外的处理，即这个更改对于父组件是透明的。
+   */
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'
+
   ;(data.props || (data.props = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
   if (isDef(on[event])) {

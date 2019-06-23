@@ -249,6 +249,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // slot target
   // only for non-scoped slots
+  // 给data添加一个slot属性，只会是非作用域插槽是才添加
   if (el.slotTarget && !el.slotScope) {
     data += `slot:${el.slotTarget},`
   }
@@ -285,6 +286,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
   return data
 }
 
+// 生成指定代码
 function genDirectives (el: ASTElement, state: CodegenState): string | void {
   const dirs = el.directives
   if (!dirs) return
@@ -294,6 +296,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
+    // 获取指定对应的方法
     const gen: DirectiveFunction = state.directives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
@@ -458,10 +461,12 @@ export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
 
+// 生成插槽slot代码
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
   let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  // 处理slot标签上的属性，即处理作用域插槽子组件绑定（提供）的数据（作用域）
   const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
   const bind = el.attrsMap['v-bind']
   if ((attrs || bind) && !children) {

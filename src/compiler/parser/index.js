@@ -473,8 +473,12 @@ function processOnce (el) {
   }
 }
 
+// 处理插槽slot，即给el添加slot属性或者slotScope属性
 function processSlot (el) {
   if (el.tag === 'slot') {
+    // 当元素是<slot>标签时，即子组件中定义的插槽元素<slot></slot>
+
+    // 获取插槽的名字
     el.slotName = getBindingAttr(el, 'name')
     if (process.env.NODE_ENV !== 'production' && el.key) {
       warn(
@@ -484,6 +488,7 @@ function processSlot (el) {
       )
     }
   } else {
+    // 获取作用域插槽
     let slotScope
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope')
@@ -510,15 +515,19 @@ function processSlot (el) {
       }
       el.slotScope = slotScope
     }
+
+    // 获取插槽目标，即在父组件中提供的插槽内容，如：<p slot="slotname">xxx</p>
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
+      // 将非作用域插槽保存到原生DOM元素的属性中
       if (el.tag !== 'template' && !el.slotScope) {
         addAttr(el, 'slot', slotTarget)
       }
     }
+
   }
 }
 

@@ -52,15 +52,16 @@ const patternTypes: Array<Function> = [String, RegExp, Array]
 
 export default {
   name: 'keep-alive',
-  abstract: true,
+  abstract: true, // keep-alive为一个抽象组件，即在组件实例建立父子关系的时候会被忽略
 
   props: {
-    include: patternTypes,
-    exclude: patternTypes,
-    max: [String, Number]
+    include: patternTypes, // 只有匹配的组件会被缓存
+    exclude: patternTypes, // 匹配到的组件都不会被缓存
+    max: [String, Number] // 可以设置缓存的大小
   },
 
   created () {
+    // 来用缓存已经创建过的vnode
     this.cache = Object.create(null)
     this.keys = []
   },
@@ -72,6 +73,7 @@ export default {
   },
 
   mounted () {
+    // 监听include，exclude： 对缓存进行遍历，发现缓存中的节点名称和新的没有匹配上，这从缓存中移除
     this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
     })
@@ -82,7 +84,9 @@ export default {
 
   render () {
     const slot = this.$slots.default
+    // 获取组件第一个子节点
     const vnode: VNode = getFirstComponentChild(slot)
+
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
@@ -94,6 +98,7 @@ export default {
         // excluded
         (exclude && name && matches(exclude, name))
       ) {
+        // 如果不匹配，则直接返回这个组件的vnode
         return vnode
       }
 
@@ -103,16 +108,21 @@ export default {
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
+
       if (cache[key]) {
+        // 如果命中缓存的话，直接从缓存中拿到vnode的组件实例
         vnode.componentInstance = cache[key].componentInstance
         // make current key freshest
+        // 重新调整顺序，把当前的key放到最后，保持最新
         remove(keys, key)
         keys.push(key)
       } else {
+        // 没有命中缓存的话，添加进缓存中
         cache[key] = vnode
         keys.push(key)
         // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
+          // 缓存的长度超过设置的长度，则删除缓存中的第一个
           pruneCacheEntry(cache, keys[0], keys, this._vnode)
         }
       }

@@ -222,6 +222,8 @@ export function createPatchFunction (backend) {
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
+      // 首次渲染时，componentInstance为undefined，如果keepAlive为true，那么vnode会缓存。
+      // 所以对于keep-alive组件包裹的组件，首次渲染和普通组件渲染没有差别，除了建立缓存之外
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       if (isDef(i = i.hook) && isDef(i = i.init)) {
         i(vnode, false /* hydrating */)
@@ -235,6 +237,7 @@ export function createPatchFunction (backend) {
         initComponent(vnode, insertedVnodeQueue)
         // 将组件DOM根节点插入到父元素下
         insert(parentElm, vnode.elm, refElm)
+
         if (isTrue(isReactivated)) {
           reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
         }
