@@ -171,9 +171,11 @@ export function createComponent (
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
+  // 提取事件监听器，因为这些监听器需要作为子组件的监听器而不是Dom的监听器
   const listeners = data.on
   // replace with listeners with .native modifier
   // so it gets processed during parent component patch.
+  // data.nativeOn赋值data.on，这样所有的原生的Dom事件会在当前组件环境中被处理
   data.on = data.nativeOn
 
   if (isTrue(Ctor.options.abstract)) {
@@ -194,7 +196,8 @@ export function createComponent (
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
-  // 实例化一个vnode，并返回
+  // 实例化一个vnode，并返回。
+  // 这里把自定义事件监听器参数传入，会在子组件中处理
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,

@@ -39,7 +39,8 @@ const genGuard = condition => `if(${condition})return null;`
 const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  self: genGuard(`$event.target !== $event.currentTarget`),
+  // self修饰符，只当事件是在当前函数触发时，才触发处理函数
+  self: genGuard(`$event.target !== $event.currentTarget`), 
   ctrl: genGuard(`!$event.ctrlKey`),
   shift: genGuard(`!$event.shiftKey`),
   alt: genGuard(`!$event.altKey`),
@@ -95,15 +96,21 @@ function genHandler (
   const isFunctionExpression = fnExpRE.test(handler.value)
 
   if (!handler.modifiers) {
+    // 没有事件修饰符
     if (isMethodPath || isFunctionExpression) {
+      // 如果事件监听器是一个函数，则直接返回
       return handler.value
     }
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
+    // 如果事件监听器是一个表达式，则使用一个函数包裹表达式后返回
     return `function($event){${handler.value}}` // inline statement
   } else {
+    // 对事件修饰符进行相应的处理，
+    // 修饰符本质是在事件监听器处理函数中加入相关的处理代码，如ev.stopPropagation,ev.preventDefault,
+    // 不符合添加时，直接return null 等方式来处理。
     let code = ''
     let genModifierCode = ''
     const keys = []

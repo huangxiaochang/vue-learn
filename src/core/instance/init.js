@@ -193,6 +193,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 
   const vnodeComponentOptions = parentVnode.componentOptions
   opts.propsData = vnodeComponentOptions.propsData
+  // 拿到父组件传入的自定义事件监听器，在initEvents过程中会处理
   opts._parentListeners = vnodeComponentOptions.listeners
   opts._renderChildren = vnodeComponentOptions.children
   opts._componentTag = vnodeComponentOptions.tag

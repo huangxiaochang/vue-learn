@@ -9,6 +9,8 @@ import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model
 // it's important to place the event as the first in the array because
 // the whole point is ensuring the v-model callback gets called before
 // user-attached handlers.
+// 规范化只能在运行时才能被确定的v-model事件指令。
+// 把v-model事件放在数组的第一位是很重要的，因为关键是要确保v-model回调要在用户添加的处理函数之前被调用。
 function normalizeEvents (on) {
   /* istanbul ignore if */
   if (isDef(on[RANGE_TOKEN])) {
@@ -45,6 +47,9 @@ function add (
   capture: boolean,
   passive: boolean
 ) {
+  // 使用了withMacroTask进行包装事件回调，即强制在DOM事件的回调函数执行期间，如果修改了数据，
+  // 那么依赖这些数据的watcher推入的队列是宏观队列。他们会在nextTick（如果有的话）之后执行，
+  // 因为nextTick使用的是微观队列。
   handler = withMacroTask(handler)
   if (once) handler = createOnceHandler(handler, event, capture)
   target.addEventListener(
@@ -76,6 +81,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
   target = vnode.elm
+  // 对v-model进行相关的处理
   normalizeEvents(on)
   updateListeners(on, oldOn, add, remove, vnode.context)
   target = undefined

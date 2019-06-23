@@ -100,6 +100,7 @@ export function addHandler (
 
   let events
   if (modifiers.native) {
+    // 原生事件
     delete modifiers.native
     events = el.nativeEvents || (el.nativeEvents = {})
   } else {
@@ -114,6 +115,7 @@ export function addHandler (
   }
 
   const handlers = events[name]
+  // 按照name进行归类，并把回调函数的字符串保留到对应的事件中
   /* istanbul ignore if */
   if (Array.isArray(handlers)) {
     important ? handlers.unshift(newHandler) : handlers.push(newHandler)
