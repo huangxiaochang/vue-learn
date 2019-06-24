@@ -36,3 +36,9 @@ lifecycleMixin(Vue)  // 在Vue.prototype挂载_update, $forceUpdate, $destroy方
 renderMixin(Vue)  // 在Vue.prototype挂载$nextTick， _render方法
 
 export default Vue
+
+// 创建一个Vue实例的大致流程
+// new Vue(options) -> 调用_init(options)进行初始化 -> 进行options选项的合并(component, filter. direction等) ->
+// 渲染函数作用代理 -> 初始化生命周期 -> 初始化事件 -> 初始化渲染函数 -> 调用beforeCreate -> 初始化inject ->
+// 初始化props、methods、data、computed、watch -> 初始化provide -> 执行created生命周期钩子函数 -> 调用实例对象的
+// vm.$mount()方法进行挂载.

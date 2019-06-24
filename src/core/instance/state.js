@@ -337,20 +337,24 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
+// 创建一个watcher实例对象
 function createWatcher (
   vm: Component,
   expOrFn: string | Function,
   handler: any,
   options?: Object
 ) {
+  // 如果是对象的写法，获取其中的handler
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
   }
+  // 如果handler是字符串，则从实例对象的methods中获取处理回调函数
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
   // key, handler, options
+  // 调用$watch方法创建一个watcher返回
   return vm.$watch(expOrFn, handler, options)
 }
 
@@ -387,12 +391,16 @@ export function stateMixin (Vue: Class<Component>) {
     options?: Object
   ): Function {
     const vm: Component = this
+    // 如果是对象的写法，进行参数的规范化后再调用$watch来创建一个watcher实例对象
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
+    // 标记为开发者创建的watcher
     options.user = true
+    // 创建一个watcher
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // 如果设置了immediate属性，会立即执行回调函数
     if (options.immediate) {
       cb.call(vm, watcher.value)
     }

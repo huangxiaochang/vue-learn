@@ -71,6 +71,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // Vue.prototype.__patch__: web/runtime/index
     if (!prevVnode) {
       // initial render
+      // 首次渲染
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
@@ -94,8 +95,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+  // 强制更新视图
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
+    // 在创建渲染函数的watcher的时候，会在vm上定义_watcher属性指向渲染函数的watcher
     if (vm._watcher) {
       vm._watcher.update()
     }
@@ -109,11 +112,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
     callHook(vm, 'beforeDestroy')
     vm._isBeingDestroyed = true
     // remove self from parent
+    // 从父级组件的$children中移除自己，接触父子组件关系
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
     // teardown watchers
+    // 把该组件的render watcher 从它所有依赖的收集器中移除
     if (vm._watcher) {
       vm._watcher.teardown()
     }
@@ -129,6 +134,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // call the last hook...
     vm._isDestroyed = true
     // invoke destroy hooks on current rendered tree
+    // 销毁该组件vnode和视图
     vm.__patch__(vm._vnode, null)
     // fire destroyed hook
     callHook(vm, 'destroyed')

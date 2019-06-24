@@ -95,6 +95,7 @@ export function initExtend (Vue: GlobalAPI) {
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
+    // 代理 Comp.prototype.key -> Comp.prototype._props.key
     proxy(Comp.prototype, `_props`, key)
   }
 }
@@ -102,6 +103,8 @@ function initProps (Comp) {
 function initComputed (Comp) {
   const computed = Comp.options.computed
   for (const key in computed) {
+    // Comp.prototype.key -> computedGetter, 在改函数中进行watcher.depend()，watcher.evaluate()
+    // 即访问Comp.prototype上的计算属性key, 会执行computedGetter函数
     defineComputed(Comp.prototype, key, computed[key])
   }
 }

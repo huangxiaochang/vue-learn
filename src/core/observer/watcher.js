@@ -121,7 +121,7 @@ export default class Watcher {
     // 每一个观察者实例对象都有一个vm实例，该属性指明了这个观察者是属于哪一个组件的
     this.vm = vm
     if (isRenderWatcher) {
-      // _watcher属性引用着该组件渲染函数观察者
+      // _watcher属性引用着该组件渲染函数观察者，$forceUpdate的时候会用到
       vm._watcher = this
     }
     // 把所有的观察者(渲染函数和非渲染函数的观察者)加入实例的_wathers中
@@ -140,10 +140,13 @@ export default class Watcher {
     this.id = ++uid // uid for batching
     this.active = true
     this.dirty = this.computed // for computed watchers
+    // deps, newDeps存储的是该watcher依赖的属性引用的dep实例
+    // depIds,newDepIds则是他们的id
     this.deps = []
     this.newDeps = []
     this.depIds = new Set() // 用于重复求值去重
     this.newDepIds = new Set() // 用于一次求值去重
+
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
@@ -151,6 +154,7 @@ export default class Watcher {
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
+      // ../util/lang.js
       // parsePath函数返回一个函数，该函数作用是解析表达式，访问表达式指定的属性值，从而触发getter进行收集订阅者
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
@@ -166,9 +170,10 @@ export default class Watcher {
     // 计算属性的观察者与其他观察者实例的实现方式不同
     if (this.computed) {
       this.value = undefined
+      // 用来收集依赖该计算属性的watcher
       this.dep = new Dep()
     } else {
-      // this.value属性保存着观察目标的值
+      // 进行初次求值，this.value属性保存着观察目标的值
       this.value = this.get()
     }
   }
@@ -356,6 +361,7 @@ export default class Watcher {
 
   /**
    * Remove self from all dependencies' subscriber list.
+   * 从所有的依赖收集器中移除自己
    */
   teardown () {
     if (this.active) {
