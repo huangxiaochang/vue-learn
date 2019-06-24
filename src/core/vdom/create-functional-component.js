@@ -75,11 +75,12 @@ export function FunctionalRenderContext (
 
 installRenderHelpers(FunctionalRenderContext.prototype)
 
+// 创建函数式组件
 export function createFunctionalComponent (
   Ctor: Class<Component>,
   propsData: ?Object,
   data: VNodeData,
-  contextVm: Component,
+  contextVm: Component, // 该函数式组件的父组件实例对象
   children: ?Array<VNode>
 ): VNode | Array<VNode> | void {
   const options = Ctor.options
@@ -93,7 +94,8 @@ export function createFunctionalComponent (
     if (isDef(data.attrs)) mergeProps(props, data.attrs)
     if (isDef(data.props)) mergeProps(props, data.props)
   }
-
+  
+  // 创建函数式组件渲染函数上下文
   const renderContext = new FunctionalRenderContext(
     data,
     props,

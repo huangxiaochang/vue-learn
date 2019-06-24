@@ -29,14 +29,15 @@ export default class VNode {
   fnScopeId: ?string; // functional scope id support
 
   constructor (
-    tag?: string,
+    tag?: string, // 组件占位标签名
     data?: VNodeData,
-    children?: ?Array<VNode>,
+    children?: ?Array<VNode>, // 组件时，该参数值为undefined
     text?: string,
     elm?: Node,
-    context?: Component,
-    componentOptions?: VNodeComponentOptions,
-    asyncFactory?: Function
+    context?: Component, // 当前组件实例对象，对要创建的组件来说，即它的父组件
+    // { Ctor, propsData, listeners, tag, children }
+    componentOptions?: VNodeComponentOptions, 
+    asyncFactory?: Function // 异步组件构造函数
   ) {
     this.tag = tag
     this.data = data

@@ -44,9 +44,9 @@ export function createAsyncPlaceholder (
 // 其他的都是第一次渲染生成一个注释节点，当异步获取组件成功后，在通过forceRender强制重新渲染，
 // 会再一次执行resolveAsyncComponent，从而能够获取到相应的异步加载结果
 export function resolveAsyncComponent (
-  factory: Function,
-  baseCtor: Class<Component>,
-  context: Component
+  factory: Function, // 加载异步组件的工厂函数
+  baseCtor: Class<Component>, // Vue构造函数
+  context: Component // 创建异步组件的当前组件实例对象
 ): Class<Component> | void {
   // 高级组件相关
   // 异步组件加载失败，返回factory.errorComp，渲染error组件

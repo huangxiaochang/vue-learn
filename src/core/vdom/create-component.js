@@ -99,8 +99,9 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+// 创建组件的vnode
 export function createComponent (
-  Ctor: Class<Component> | Function | Object | void,
+  Ctor: Class<Component> | Function | Object | void, // 组件对象或者构造函数
   data: ?VNodeData,
   context: Component,
   children: ?Array<VNode>,
@@ -128,19 +129,21 @@ export function createComponent (
     return
   }
 
-  // async component
+  // async component, 因为一部组件开始是，是开发者传递进来的函数，没有使用Vue.extend
+  // 创建一个Vue的子类，所以是没有cid属性的，所以这里判断如果没有定义cid属性的haul，
+  // 则为异步组件
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     // 解析异步组件，第一次解析的时候，在进行异步加载时，已经执行完resolveAsyncComponent，
     // 返回值为undefined，然后等到异步加载完成，进行resolve后，会进行强制重新渲染，从而会
-    // 在此执行这里，再次执行resolveAsyncComponent，得到异步加载完成之后的结果
+    // 在此执行这里，再次执行resolveAsyncComponent，得到异步加载完成之后的结果(组件构造函数)。
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {
       // return a placeholder node for async component, which is rendered
       // as a comment node but preserves all the raw information for the node.
       // the information will be used for async server-rendering and hydration.
-      // 第一次resolveAsyncComponent的返回值为undefined，所以会执行这里，创建一个异步组件的占位注释节点
+      // 第一次resolveAsyncComponent的返回值为undefined，所以会执行这里，创建一个异步组件的占位vnode
       return createAsyncPlaceholder(
         asyncFactory,
         data,
@@ -155,6 +158,8 @@ export function createComponent (
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
+  // 解析合并构造函数的options选项，因为有一些情况下，在组件构造函数创建之后，有可能
+  // 会有全局mixins的使用
   resolveConstructorOptions(Ctor)
 
   // transform component v-model data into props & events
@@ -164,9 +169,11 @@ export function createComponent (
   }
 
   // extract props
+  // 提取props属性
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
+  // 函数式组件
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
@@ -183,6 +190,7 @@ export function createComponent (
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
     // other than props & listeners & slot
+    // 抽象组件的data不会保存任何东西，除了slot
 
     // work around flow
     const slot = data.slot
@@ -193,7 +201,8 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
-  // 安装组件钩子函数
+  // 安装组件管理钩子函数到占位node上面，即在data.hook中定义或者合并管理
+  // 组件占位node的钩子函数，如init，prepatch，insert，destroy等钩子函数。
   installComponentHooks(data)
 
   // return a placeholder vnode
