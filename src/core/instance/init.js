@@ -188,8 +188,8 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
   const parentVnode = options._parentVnode
-  opts.parent = options.parent
-  opts._parentVnode = parentVnode
+  opts.parent = options.parent // 该组件的父级Vue实例对象
+  opts._parentVnode = parentVnode // 组件的_parentVnode即为该组件的占位vnode
 
   const vnodeComponentOptions = parentVnode.componentOptions
   opts.propsData = vnodeComponentOptions.propsData

@@ -26,6 +26,7 @@ export function FunctionalRenderContext (
   const options = Ctor.options
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
+  // 确保createElement函数在函数式组件中能够得到一个独特的上下文，这对于正确指定插槽检查是必要的。
   let contextVm
   if (hasOwn(parent, '_uid')) {
     contextVm = Object.create(parent)
@@ -76,6 +77,8 @@ export function FunctionalRenderContext (
 installRenderHelpers(FunctionalRenderContext.prototype)
 
 // 创建函数式组件
+// 函数式组件是无状态的(即没有响应式数据),也没有实例(即没有this上下文)。
+// 组件需要的一切是通过context参数传递，即函数式组件渲染的第二个参数。
 export function createFunctionalComponent (
   Ctor: Class<Component>,
   propsData: ?Object,
@@ -83,6 +86,7 @@ export function createFunctionalComponent (
   contextVm: Component, // 该函数式组件的父组件实例对象
   children: ?Array<VNode>
 ): VNode | Array<VNode> | void {
+  // 处理props选项
   const options = Ctor.options
   const props = {}
   const propOptions = options.props
@@ -95,7 +99,7 @@ export function createFunctionalComponent (
     if (isDef(data.props)) mergeProps(props, data.props)
   }
   
-  // 创建函数式组件渲染函数上下文
+  // 创建函数式组件渲染函数上下文,作为函数式组件渲染函数的第二个参数传进，组件所需要的一切数据都在这里
   const renderContext = new FunctionalRenderContext(
     data,
     props,
@@ -104,6 +108,7 @@ export function createFunctionalComponent (
     Ctor
   )
 
+  // 因为函数式组件是无上下文的，所以这里绑定render执行的环境是null
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
   if (vnode instanceof VNode) {

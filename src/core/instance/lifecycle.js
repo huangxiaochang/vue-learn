@@ -58,7 +58,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   // _update的作用：把vnode渲染成真实的DOM
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
-    const prevEl = vm.$el
+    const prevEl = vm.$el // 如果是根实例对象，则为根options中el选项所对应的dom元素
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
     // 把当前vm赋值activeInstance, prevActiveInstance和当前的vm是父子关系。

@@ -64,7 +64,7 @@ export function renderMixin (Vue: Class<Component>) {
   // 作用：调用options.render, 返回虚拟node
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
-    // _parentVnode为父级组件的vnode对象
+    // _parentVnode为父级组件的vnode对象,对于根实例对象来说为undefined
     const { render, _parentVnode } = vm.$options
 
     // reset _rendered flag on slots for duplicate slot check
@@ -75,6 +75,7 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
 
+    //拿到父级提供的slot vnode
     if (_parentVnode) {
       vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject
     }
@@ -117,7 +118,7 @@ export function renderMixin (Vue: Class<Component>) {
       }
       vnode = createEmptyVNode()
     }
-    // set parent
+    // set parent，建立父子关系
     vnode.parent = _parentVnode
     return vnode
   }

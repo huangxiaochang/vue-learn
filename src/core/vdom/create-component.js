@@ -33,6 +33,7 @@ import {
 } from 'weex/runtime/recycle-list/render-component-template'
 
 // inline hooks to be invoked on component VNodes during patch
+// patch阶段，会在适当的时机调用这些钩子函数
 const componentVNodeHooks = {
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
@@ -41,14 +42,16 @@ const componentVNodeHooks = {
       vnode.data.keepAlive
     ) {
       // kept-alive components, treat as a patch
+      // keep-alive组件的处理逻辑
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
       // keep-alive组件命中缓存时，不会走这里，所以就不会再执行mounted，created等钩子函数
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
-        activeInstance
+        activeInstance // 父级Vue实例对象
       )
+      // 调用$munted挂载组件，即会调用_render,_update等方法
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -103,7 +106,7 @@ const hooksToMerge = Object.keys(componentVNodeHooks)
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void, // 组件对象或者构造函数
   data: ?VNodeData,
-  context: Component,
+  context: Component, // 父级组件
   children: ?Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
@@ -231,9 +234,14 @@ export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
 ): Component {
+  // 定义内部组件参数
   const options: InternalComponentOptions = {
+    // 这里设置_isComponent为true,所以在执行_init初始化组件的时候，有些逻辑会不一样。
     _isComponent: true,
-    _parentVnode: vnode,
+    // 组件的options选项的_parentVnode保存的为该组件的占位vnode,在执行_createElement的
+    // createComponent创建组件vnode的时候，即对于模板中的组件来说，render执行阶段，只会创建
+    // 一个组件vnode作为组件的占位(代表该组件)
+    _parentVnode: vnode, 
     parent
   }
   // check inline-template render functions
@@ -242,6 +250,7 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // vnode.componentOptions.Ctor子组件的构造函数，即创建一个Vue子类实例返回
   return new vnode.componentOptions.Ctor(options)
 }
 

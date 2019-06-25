@@ -73,7 +73,8 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
-export function createPatchFunction (backend) {
+export function createPatchFunction (
+  ) {
   let i, j
   const cbs = {}
 
@@ -130,12 +131,12 @@ export function createPatchFunction (backend) {
 
   let creatingElmInVPre = 0
 
-  // 创建元素
+  // 创建元素:通过虚拟节点创建真实的DOM并插入到它的父节点中
   function createElm (
     vnode,
     insertedVnodeQueue,
-    parentElm,
-    refElm,
+    parentElm, // 根实例时，为根实例options中el选项的父节点
+    refElm, // 下一个兄弟节点
     nested,
     ownerArray,
     index
@@ -150,6 +151,7 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    // 如果是组件vnode的话，会创建一个组件的Dom树
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -198,10 +200,13 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
+        // 创建子元素
         createChildren(vnode, children, insertedVnodeQueue)
         if (isDef(data)) {
+          // 执行所有的create并把vnode加入insertedVnodeQueue
           invokeCreateHooks(vnode, insertedVnodeQueue)
         }
+        // 将Dom节点插入到父节点中，因为是递归调用createElm，所以插入的顺序是先子后父。
         insert(parentElm, vnode.elm, refElm)
       }
 
@@ -221,11 +226,14 @@ export function createPatchFunction (backend) {
 
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
+    // 如果不是组件vnode，则vnode.data为undefined，则不走if，直接返回undefined，结束该函数，
+    // 则在createElm函数中会创建非组件元素
     if (isDef(i)) {
       // 首次渲染时，componentInstance为undefined，如果keepAlive为true，那么vnode会缓存。
       // 所以对于keep-alive组件包裹的组件，首次渲染和普通组件渲染没有差别，除了建立缓存之外
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        // 执行init钩子函数
         i(vnode, false /* hydrating */)
       }
       // after calling the init hook, if the vnode is a child component
@@ -253,6 +261,7 @@ export function createPatchFunction (backend) {
     }
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
+      // 执行create钩子，并在insertedVnodeQueue中加入vnode
       invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode)
     } else {
@@ -318,6 +327,7 @@ export function createPatchFunction (backend) {
     return isDef(vnode.tag)
   }
 
+  // 执行所有的create钩子并把vnode push进insertedVnodeQueue中
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
     for (let i = 0; i < cbs.create.length; ++i) {
       cbs.create[i](emptyNode, vnode)
@@ -719,6 +729,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // _update方法hi调用：core/instance/lifecycle.js
+  // 首次patch: vm.$el(组件的$el: undefined), vnode, hydrating, false
+  // 非首次：preVnode, vnode, undefined, undefined
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     // 如果新的vnode不存在，则销毁旧的vnode
     // isUndef: vnode === undefined || vnode === null
@@ -773,10 +786,12 @@ export function createPatchFunction (backend) {
 
         // 如两个节点不相同，则直接创建一个新的节点来替换旧节点，并不会对他们的children进行diff
         // replacing existing element
+        // 如果是new Vue({el: '#app'}),则这里的oldElm为id为app的元素，parentElm则父它的父元素
         const oldElm = oldVnode.elm
         const parentElm = nodeOps.parentNode(oldElm)
 
         // create new node
+        // 创建一个真实DOM节点并插入其父节点中
         createElm(
           vnode,
           insertedVnodeQueue,

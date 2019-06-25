@@ -92,6 +92,7 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
           isDef(nestedIndex)) {
           c.key = `__vlist${nestedIndex}_${i}__`
         }
+        // 如果children中要是createElement函数的话，直接加入res中
         res.push(c)
       }
     }
